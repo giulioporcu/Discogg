@@ -16,7 +16,7 @@ namespace Application.Services
         /// <param name="key">The storage key.</param>
         /// <param name="value">The value to store.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public ValueTask SetAsync(string key, string value) 
+        public ValueTask SetAsync(string key, string value)
             => jsRuntime.InvokeVoidAsync("discogg.localStorage.setAsync", key, value);
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Application.Services
         /// </summary>
         /// <param name="key">The storage key.</param>
         /// <returns>The stored value, or null if not found.</returns>
-        public ValueTask<string?> GetAsync(string key) 
+        public ValueTask<string?> GetAsync(string key)
             => jsRuntime.InvokeAsync<string?>("discogg.localStorage.getAsync", key);
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Application.Services
         /// <param name="key">The storage key.</param>
         /// <param name="value">The encrypted value to store.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public ValueTask SetEncryptedAsync(string key, string value) 
+        public ValueTask SetEncryptedAsync(string key, string value)
             => jsRuntime.InvokeVoidAsync("discogg.localStorage.setEncryptedAsync", key, value);
 
         /// <summary>
@@ -41,14 +41,14 @@ namespace Application.Services
         /// </summary>
         /// <param name="key">The storage key.</param>
         /// <returns>The decrypted value, or null if not found.</returns>
-        public ValueTask<string?> GetDecryptedAsync(string key) 
+        public ValueTask<string?> GetDecryptedAsync(string key)
             => jsRuntime.InvokeAsync<string?>("discogg.localStorage.getDecryptedAsync", key);
 
         /// <summary>
         /// Removes the given key from local storage.
         /// </summary>
         /// <param name="key">The storage key.</param>
-        public ValueTask<string?> RemoveAsync(string key) 
+        public ValueTask<string?> RemoveAsync(string key)
             => jsRuntime.InvokeAsync<string?>("discogg.localStorage.removeAsync", key);
     }
 }

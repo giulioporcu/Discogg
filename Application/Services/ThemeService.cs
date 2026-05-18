@@ -34,8 +34,6 @@ namespace Application.Services
         /// </summary>
         public const string DEFAULT_PRIMARY_COLOR_VALUE = "rgba(15,91,3,1)";
 
-        private bool _isDarkMode;
-
         /// <summary>
         /// Applies derived palette colors based on the provided base color.
         /// </summary>
@@ -97,10 +95,10 @@ namespace Application.Services
         /// </summary>
         public bool IsDarkMode
         {
-            get => this._isDarkMode;
+            get;
             set
             {
-                this._isDarkMode = value;
+                field = value;
                 this.NotifyStateChanged();
             }
         }

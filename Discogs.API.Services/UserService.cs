@@ -53,9 +53,9 @@ namespace Discogs.API.Services
                     {
                         if (userResponse.IsSuccessStatusCode && await this._serializationService.DeserializeAsync<UserProfile>(userResponse, ct) is UserProfile user)
                         {
-                           // user.Listings = await this.Hydrate<List<Listing>>(user.InventoryUrl, ct) ?? [];
-                         //   user.CollectionFolders = await this.Hydrate<List<UserCollectionFolder>>(user.CollectionFoldersUrl, ct) ?? [];
-                        //    user.CollectionFields = await this.Hydrate<List<UserCollectionField>>(user.CollectionFieldsUrl, ct) ?? [];
+                            // user.Listings = await this.Hydrate<List<Listing>>(user.InventoryUrl, ct) ?? [];
+                            //   user.CollectionFolders = await this.Hydrate<List<UserCollectionFolder>>(user.CollectionFoldersUrl, ct) ?? [];
+                            //    user.CollectionFields = await this.Hydrate<List<UserCollectionField>>(user.CollectionFieldsUrl, ct) ?? [];
 
                             return user;
                         }
