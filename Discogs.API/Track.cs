@@ -17,8 +17,8 @@ namespace Discogs.API.Core
         /// <summary>
         /// Gets or sets the track type (e.g., track, index, heading).
         /// </summary>
-        [JsonPropertyName("type")]
-        public string? Type { get; set; }
+        [JsonPropertyName("type_")]
+        public string? TrackType { get; set; }
 
         /// <summary>
         /// Gets or sets the track title.

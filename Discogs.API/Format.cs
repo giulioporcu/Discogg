@@ -17,7 +17,7 @@ namespace Discogs.API.Core
         /// Gets or sets the quantity of items in this format.
         /// </summary>
         [JsonPropertyName("qty")]
-        public string? Quantity { get; set; }
+        public int? Quantity { get; set; }
 
         /// <summary>
         /// Gets or sets descriptive attributes of the format (e.g., Album, Stereo).

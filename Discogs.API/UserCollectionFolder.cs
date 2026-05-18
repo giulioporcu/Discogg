@@ -14,6 +14,18 @@ namespace Discogs.API.Core
         public int? Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the folder name.
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the count of items in the folder.
+        /// </summary>
+        [JsonPropertyName("count")]
+        public int? Count { get; set; }
+
+        /// <summary>
         /// Gets or sets the user collection folder instance identifier.
         /// </summary>
         [JsonPropertyName("instance_id")]

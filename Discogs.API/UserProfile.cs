@@ -6,7 +6,7 @@ namespace Discogs.API.Core
     /// Represents a Discogs user account with profile details, activity statistics,
     /// marketplace information, and related resource URLs.
     /// </summary>
-    public class User
+    public class UserProfile
     {
         /// <summary>
         /// Gets or sets the user identifier.
@@ -73,6 +73,9 @@ namespace Discogs.API.Core
         /// </summary>
         [JsonPropertyName("num_pending")]
         public int? NumberOfSubmissionsPending { get; set; }
+
+        [JsonPropertyName("num_wantlist")]
+        public int? NumberOfWantListItems { get; set; }
 
         /// <summary>
         /// Gets or sets the number of items the user has for sale.
@@ -199,31 +202,5 @@ namespace Discogs.API.Core
         /// </summary>
         [JsonPropertyName("is_staff")]
         public bool? IsStaff { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of items in the user's collection.
-        /// </summary>
-        [JsonPropertyName("num_collection")]
-        public int? NumberOfItemsInCollection { get; set; }
-
-        /// <summary>
-        /// Gets or sets the number of items in the user's wantlist.
-        /// </summary>
-        [JsonPropertyName("num_wantlist")]
-        public int? NumberOfItemsInWantList { get; set; }
-
-        // Convenience properties
-
-        [JsonIgnore]
-        public List<Listing> Listings { get; set; } = [];
-
-        [JsonIgnore]
-        public List<UserCollectionFolder> CollectionFolders { get; set; } = [];
-
-        [JsonIgnore]
-        public List<UserCollectionField> CollectionFields { get; set; } = [];
-
-        [JsonIgnore]
-        public List<Want> Wants { get; set; } = [];
     }
 }

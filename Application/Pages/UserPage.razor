@@ -67,7 +67,6 @@
                     <MudButton Variant="Variant.Filled" 
                                Color="Color.Default" 
                                OnClick="PrevItem"
-                               Disabled="@((user.CollectionFolders?.Count ?? 0) <= 3)"
                                Class="carousel-btn">
                         <MudIcon Icon="@Icons.Material.Filled.ChevronLeft" />
                     </MudButton>
@@ -91,7 +90,6 @@
                     <MudButton Variant="Variant.Filled" 
                                Color="Color.Default" 
                                OnClick="NextItem"
-                               Disabled="@((user.CollectionFolders?.Count ?? 0) <= 3)"
                                Class="carousel-btn">
                         <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
                     </MudButton>
@@ -168,7 +166,7 @@
 @code {
     [Parameter] public string? userName { get; set; }
 
-    private User? user;
+    private UserProfile? user;
     private bool isLoading = true;
     private decimal sumLowestPrice;
     private int totalItems;
@@ -181,12 +179,12 @@
         isLoading = true;
         user = await UserService.GetAsync(userName);
         
-        if (user?.CollectionFolders != null)
+       // if (user?.CollectionFolders != null)
         {
-            totalItems = user.CollectionFolders.Count;
+      /*      totalItems = user.CollectionFolders.Count;
             sumLowestPrice = (decimal)user.CollectionFolders
                 .Where(f => f.BasicInformation?.LowestPrice != null)
-                .Sum(f => f.BasicInformation!.LowestPrice ?? 0f);
+                .Sum(f => f.BasicInformation!.LowestPrice ?? 0f);*/
             
             UpdateVisibleItems();
         }
@@ -196,40 +194,40 @@
 
     private void PrevItem()
     {
-        if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
-            return;
+   //     if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
+ //           return;
 
-        int itemCount = user.CollectionFolders.Count;
-        carouselIndex = (carouselIndex - 3 + itemCount) % itemCount;
+ //       int itemCount = user.CollectionFolders.Count;
+ //       carouselIndex = (carouselIndex - 3 + itemCount) % itemCount;
         UpdateVisibleItems();
     }
 
     private void NextItem()
     {
-        if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
-            return;
+    //    if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
+  //          return;
 
-        carouselIndex = (carouselIndex + 3) % user.CollectionFolders.Count;
+    //    carouselIndex = (carouselIndex + 3) % user.CollectionFolders.Count;
         UpdateVisibleItems();
     }
 
     private void UpdateVisibleItems()
     {
-        if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
+    //    if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
         {
             visibleItems = new List<UserCollectionFolder>();
             return;
         }
 
-        var folders = user.CollectionFolders;
-        int count = folders.Count;
+       // var folders = user.CollectionFolders;
+       // int count = folders.Count;
         
         visibleItems = new List<UserCollectionFolder>();
         
         for (int i = 0; i < 3; i++)
         {
-            int idx = (carouselIndex + i) % count;
-            visibleItems.Add(folders[idx]);
+      //      int idx = (carouselIndex + i) % count;
+     //       visibleItems.Add(folders[idx]);
         }
     }
 }

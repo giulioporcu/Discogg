@@ -35,7 +35,7 @@ namespace Discogs.API.Core
         /// Gets or sets the seller information.
         /// </summary>
         [JsonPropertyName("seller")]
-        public User? Seller { get; set; }
+        public UserProfile? Seller { get; set; }
 
         /// <summary>
         /// Gets or sets the listing price.
@@ -191,13 +191,13 @@ namespace Discogs.API.Core
         /// Gets or sets the buyer information.
         /// </summary>
         [JsonPropertyName("buyer")]
-        public User? Buyer { get; set; }
+        public UserProfile? Buyer { get; set; }
 
         /// <summary>
         /// Gets or sets the seller information.
         /// </summary>
         [JsonPropertyName("seller")]
-        public User? Seller { get; set; }
+        public UserProfile? Seller { get; set; }
 
         /// <summary>
         /// Gets or sets the buyer address identifier.
@@ -491,7 +491,7 @@ namespace Discogs.API.Core
         /// Gets or sets the sender information.
         /// </summary>
         [JsonPropertyName("from")]
-        public User? From { get; set; }
+        public UserProfile? From { get; set; }
 
         /// <summary>
         /// Gets or sets the sender username.
@@ -599,7 +599,7 @@ namespace Discogs.API.Core
         /// Gets or sets the owner information.
         /// </summary>
         [JsonPropertyName("owner")]
-        public User? Owner { get; set; }
+        public UserProfile? Owner { get; set; }
 
         /// <summary>
         /// Gets or sets the date the list was created.

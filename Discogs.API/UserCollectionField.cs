@@ -26,10 +26,10 @@ namespace Discogs.API.Core
         public int? Position { get; set; }
 
         /// <summary>
-        /// Gets or sets whether this field is publicy visible or not.
+        /// Gets or sets whether this field is publicly visible or not.
         /// </summary>
         [JsonPropertyName("public")]
-        public bool? IsPublic { get; set; }
+        public bool? IsPubliclyVisible { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the field.
