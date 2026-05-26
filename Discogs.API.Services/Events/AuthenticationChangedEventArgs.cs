@@ -5,7 +5,7 @@ namespace Discogs.API.Services.Events
     /// <summary>
     /// Provides data for authentication state changes.
     /// </summary>
-    /// <param name="user">
+    /// <param name="oAuth">
     /// The authenticated OAuth user, or <c>null</c> if authentication was cleared.
     /// </param>
     public class AuthenticationChangedEventArgs(OAuth? oAuth = null) : EventArgs

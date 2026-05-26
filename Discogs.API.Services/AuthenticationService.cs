@@ -69,7 +69,7 @@ namespace Discogs.API.Services
 
             try
             {
-                string uri = DiscogsService.AssembleUri("/oauth/identity", new Dictionary<string, string>() { { "token", token } });
+                string uri = discogsService.AssembleUri("/oauth/identity", new Dictionary<string, string>() { { "token", token } });
                 using HttpResponseMessage? response = await discogsService.DoRequestAsync(HttpMethod.Get, uri, content: null, ct);
 
                 if (response is null)

@@ -45,7 +45,7 @@ namespace Discogs.API.Services
         {
             try
             {
-                string uri = DiscogsService.AssembleUri($"/users/{name}");
+                string uri = this._discogsService.AssembleUri($"/users/{name}");
 
                 if (await this._discogsService.DoGetRequestAsync(uri, ct) is HttpResponseMessage userResponse)
                 {
@@ -71,6 +71,16 @@ namespace Discogs.API.Services
             }
         }
 
+        /// <summary>
+        /// Fetches and deserializes a response from the given URL into the specified type.
+        /// </summary>
+        /// <typeparam name="T">The target type to deserialize into.</typeparam>
+        /// <param name="url">The URL to send the GET request to.</param>
+        /// <param name="ct">A cancellation token used to cancel the request.</param>
+        /// <returns>
+        /// An instance of <typeparamref name="T"/> if the request and deserialization succeed;
+        /// otherwise <c>default</c>.
+        /// </returns>
         public async Task<T?> Hydrate<T>(string? url, CancellationToken ct)
         {
             if (String.IsNullOrWhiteSpace(url))

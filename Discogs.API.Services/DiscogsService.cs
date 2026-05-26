@@ -1,5 +1,6 @@
 ﻿using Discogs.API.Services.Events;
 using Microsoft.Extensions.Logging;
+using System.Net;
 using System.Reflection;
 
 namespace Discogs.API.Services
@@ -10,14 +11,6 @@ namespace Discogs.API.Services
     /// </summary>
     public class DiscogsService
     {
-        /// <summary>
-        /// The base URI for all Discogs API endpoints.
-        /// </summary>
-        public const string BASE_URI = "https://api.discogs.com";
-
-        private const int MAX_RETRIES = 3;
-        private const int INITIAL_DELAY_MS = 1000;
-
         /// <summary>
         /// Occurs when an error is raised during request processing.
         /// The event argument contains a descriptive error message.
@@ -37,21 +30,21 @@ namespace Discogs.API.Services
         public event EventHandler<RequestCompletedEventArgs>? OnRequestCompleted;
 
         private readonly HttpClient _client;
-        private readonly ILogger<DiscogsService>? _logger;
+        private readonly ApplicationConfig _config;
+        private readonly ILogger<DiscogsService>? _logger; 
 
         /// <summary>
-        /// Provides low‑level HTTP request handling for communicating with the Discogs API,
-        /// including URI construction, request execution, and request lifecycle events.
+        /// Initializes a new instance with default headers and logging.
         /// </summary>
-        /// <param name="client">
-        /// The <see cref="HttpClient"/> instance used to send HTTP requests.
-        /// </param>
+        /// <param name="config">The application configuration providing API base URL and retry settings.</param>
+        /// <param name="httpClientFactory">The factory used to create <see cref="HttpClient"/> instances.</param>
         /// <param name="logger">
-        /// The <see cref="ILogger{TCategoryName}"/> instance used for logging.
+        /// Optional logger used to record request lifecycle and errors.
         /// </param>
-        public DiscogsService(HttpClient client, ILogger<DiscogsService>? logger = null)
+        public DiscogsService(ApplicationConfig config, IHttpClientFactory httpClientFactory, ILogger<DiscogsService>? logger = null)
         {
-            this._client = client;
+            this._client = httpClientFactory.CreateClient();
+            this._config = config;
             this._logger = logger;
 
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -68,9 +61,9 @@ namespace Discogs.API.Services
         /// <param name="route">The API route to append to the base URI.</param>
         /// <param name="queryParams">Optional query parameters to include in the URI.</param>
         /// <returns>A complete request URI as a string.</returns>
-        public static string AssembleUri(string? route, Dictionary<string, string>? queryParams = null)
+        public string AssembleUri(string? route, Dictionary<string, string>? queryParams = null)
         {
-            UriBuilder uriBuilder = new($"{BASE_URI}{route ?? String.Empty}");
+            UriBuilder uriBuilder = new($"{this._config.BaseUrl}{route ?? String.Empty}");
 
             if (queryParams is null || queryParams.Count <= 0)
             {
@@ -91,10 +84,10 @@ namespace Discogs.API.Services
         /// </summary>
         private static bool IsTransientError(HttpResponseMessage response) => response.StatusCode switch
         {
-            System.Net.HttpStatusCode.ServiceUnavailable => true,
-            System.Net.HttpStatusCode.TooManyRequests => true,
-            System.Net.HttpStatusCode.GatewayTimeout => true,
-            System.Net.HttpStatusCode.BadGateway => true,
+            HttpStatusCode.ServiceUnavailable => true,
+            HttpStatusCode.TooManyRequests => true,
+            HttpStatusCode.GatewayTimeout => true,
+            HttpStatusCode.BadGateway => true,
             _ => (int)response.StatusCode >= 500
         };
 
@@ -116,12 +109,15 @@ namespace Discogs.API.Services
             this.OnRequestStarting?.Invoke(null, new RequestStartingEventArgs(method, uri));
 
             Exception? lastException = null;
-            for (int attempt = 0; attempt < MAX_RETRIES; attempt++)
+            int maxRetries = this._config.MaxRetries;
+            int initialDelayMs = this._config.InitialDelayMs;
+
+            for (int attempt = 0; attempt < maxRetries; attempt++)
             {
                 try
                 {
-                    HttpRequestMessage request = new(method, uri) { Content = content };
-                    HttpResponseMessage response = await this._client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+                    using HttpRequestMessage request = new(method, uri) { Content = content };
+                    using HttpResponseMessage response = await this._client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
 
                     this.OnRequestCompleted?.Invoke(null, new RequestCompletedEventArgs(method, uri, response.StatusCode));
 
@@ -137,21 +133,20 @@ namespace Discogs.API.Services
                     }
 
                     this._logger?.LogWarning("Transient error {StatusCode}, attempt {Attempt}/{MaxRetries}",
-                        response.StatusCode, attempt + 1, MAX_RETRIES);
+                        response.StatusCode, attempt + 1, maxRetries);
 
-                    response.Dispose();
-                    await Task.Delay(INITIAL_DELAY_MS * (int)Math.Pow(2, attempt), ct);
+                    await Task.Delay(initialDelayMs * (int)Math.Pow(2, attempt), ct).ConfigureAwait(false);
                 }
-                catch (Exception exception) when (attempt < MAX_RETRIES - 1)
+                catch (Exception exception) when (attempt < maxRetries - 1)
                 {
                     lastException = exception;
-                    this._logger?.LogWarning(exception, "Request failed, attempt {Attempt}/{MaxRetries}", attempt + 1, MAX_RETRIES);
-                    await Task.Delay(INITIAL_DELAY_MS * (int)Math.Pow(2, attempt), ct);
+                    this._logger?.LogWarning(exception, "Request failed, attempt {Attempt}/{MaxRetries}", attempt + 1, maxRetries);
+                    await Task.Delay(initialDelayMs * (int)Math.Pow(2, attempt), ct).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
                     lastException = exception;
-                    this._logger?.LogError(exception, "Request failed after {MaxRetries} attempts", MAX_RETRIES);
+                    this._logger?.LogError(exception, "Request failed after {MaxRetries} attempts", maxRetries);
                 }
             }
 
@@ -161,9 +156,15 @@ namespace Discogs.API.Services
         }
 
         /// <summary>
-        /// Sends a GET request to the specified URI.
+        /// Sends a GET request to the specified URI and returns the response.
         /// </summary>
+        /// <param name="uriString">The target URI.</param>
+        /// <param name="ct">A cancellation token used to cancel the request.</param>
+        /// <returns>
+        /// The <see cref="HttpResponseMessage"/> returned by the server,
+        /// or <c>null</c> if an error occurred.
+        /// </returns>
         public async Task<HttpResponseMessage?> DoGetRequestAsync(string uriString, CancellationToken ct = default)
-            => await this.DoRequestAsync(HttpMethod.Get, uriString, content: null, ct);
+            => await this.DoRequestAsync(HttpMethod.Get, uriString, content: null, ct).ConfigureAwait(false);
     }
 }

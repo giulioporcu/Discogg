@@ -25,7 +25,13 @@ namespace Application
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
+            // Clients
+            builder.Services.AddScoped(httpClientProvider =>
+                new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
             // Services
+            builder.Services.AddHttpClient();
+            builder.Services.AddSingleton<ApplicationConfig>();
             builder.Services.AddScoped<ThemeService>();
             builder.Services.AddScoped<VersionInfoService>();
             builder.Services.AddScoped<LocalStorageService>();
@@ -33,10 +39,6 @@ namespace Application
             builder.Services.AddScoped<AuthenticationService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<DiscogsService>();
-
-            // Clients
-            builder.Services.AddScoped(httpClientProvider =>
-                new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             // MudBlazor
             builder.Services.AddMudServices(config =>

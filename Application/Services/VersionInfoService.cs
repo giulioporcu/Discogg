@@ -128,7 +128,6 @@ namespace Application.Services
         /// An <see cref="ApiVersionInfo"/> instance if the request and deserialization succeed;
         /// otherwise <c>null</c>.
         /// </returns>
-
         public async Task<ApiVersionInfo?> GetApiInfoAsync(CancellationToken ct = default)
         {
             this.ApiInfo = null;
@@ -136,7 +135,7 @@ namespace Application.Services
 
             try
             {
-                string url = DiscogsService.AssembleUri(String.Empty);
+                string url = this._discogsService.AssembleUri(String.Empty);
                 using HttpResponseMessage? responseMessage = await this._discogsService.DoRequestAsync(HttpMethod.Get, url, content: null, ct) ?? throw new Exception(Messages.WebRequestFailed);
 
                 if (responseMessage.IsSuccessStatusCode && await this._serializationService.DeserializeAsync<ApiVersionInfo>(responseMessage, ct) is ApiVersionInfo connectionInfo)

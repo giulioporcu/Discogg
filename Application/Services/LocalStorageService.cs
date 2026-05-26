@@ -45,9 +45,10 @@ namespace Application.Services
             => jsRuntime.InvokeAsync<string?>("discogg.localStorage.getDecryptedAsync", key);
 
         /// <summary>
-        /// Removes the given key from local storage.
+        /// Removes the given key from local storage and returns the removed value.
         /// </summary>
         /// <param name="key">The storage key.</param>
+        /// <returns>The removed value, or null if the key does not exist.</returns>
         public ValueTask<string?> RemoveAsync(string key)
             => jsRuntime.InvokeAsync<string?>("discogg.localStorage.removeAsync", key);
     }
