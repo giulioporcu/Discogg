@@ -1,47 +1,32 @@
 ﻿@inject ThemeService ThemeService
-@inject DiscogsService DiscogsClient
+@inject DiscogsClient DiscogsClient
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
-@inject VersionInfoService ConnectionInfoService
-@inject AuthenticationService AuthenticationService
 
 <MudPaper Elevation="0" Class="pa-4 d-flex justify-space-between align-center component paper-glass">
     <MudStack Row="false" Spacing="0">
-        @if (this.ConnectionInfoService.IsConnected)
-        {
-            <MudStack Row="true" Spacing="1">
-                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: #146617;" />
-                <MudLink Typo="Typo.caption" Target="_blank" Href="https://www.discogs.com/developers/">
-                    Discogs API @(this.ConnectionInfoService.ApiInfo!.ApiVersion)
-                </MudLink>
-            </MudStack>
 
-            <MudStack Row="true" Spacing="1">
-                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: #146617;" />
-                <MudLink Typo="Typo.caption" Target="_blank" Href="https://github.com/GiulioPorcu/Discogg">
-                    Application v@(this.ConnectionInfoService.ApplicationVersion)
-                </MudLink>
-            </MudStack>
-        }
-        else
-        {
-            <MudText Typo="Typo.caption">
-                <MudIcon Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" Style="color: #c10000;" />
-                Application
-            </MudText>
-            <MudText Typo="Typo.caption">
-                <MudIcon Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" Style="color: #c10000;" />
-                Discogs API
-            </MudText>
-        }
+        <MudStack Row="true" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: #146617;" />
+            <MudLink Typo="Typo.caption" Target="_blank" Href="https://www.discogs.com/developers/">
+                Discogs API @(DiscogsVersion)
+            </MudLink>
+        </MudStack>
+
+        <MudStack Row="true" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Style="color: #146617;" />
+            <MudLink Typo="Typo.caption" Target="_blank" Href="https://github.com/GiulioPorcu/Discogg">
+                Application v@(AppVersion)
+            </MudLink>
+        </MudStack>
         <MudText Typo="Typo.caption" Class="pt-2">
             © @(DateTime.Now.Year) | Giulio Porcu
         </MudText>
     </MudStack>
-    @if (this.AuthenticationService.IsAuthenticated)
+    @if (CurrentUser != null)
     {
         <MudText Typo="Typo.caption" Class="mt-auto">
-            @(Messages.LoggedInAs): @(this.AuthenticationService!.User!.UserName)
+            @(Messages.LoggedInAs): @(this.CurrentUser!.UserName)
         </MudText>
     }
     <div class="d-flex align-center mt-auto">
@@ -60,29 +45,18 @@
 
 @code {
     private const int TOOLTIP_DELAY = 100;
+    private string? AppVersion { get; set; }
+    private string? DiscogsVersion { get; set; }
+    private OAuth? CurrentUser { get; set; }
 
     protected override async void OnInitialized()
     {
-        // Update the "api info" label automatically when connectivity changed
-        this.ConnectionInfoService.OnConnectivityChanged += (sender, args) =>
-        {
-            this.InvokeAsync(this.StateHasChanged);
-        };
-        
-        // Update the "version info" label automatically when version info fetched
-        this.ConnectionInfoService.OnApplicationVersionFetched += (sender, args) =>
-        {
-            this.InvokeAsync(this.StateHasChanged);
-        };
+        this.AppVersion = this.DiscogsClient.ApiVersionInfoService.GetApplicationVersion();
+        this.DiscogsVersion = (await this.DiscogsClient.ApiVersionInfoService.GetDiscogsVersionAsync()).ApiVersion ?? "N/A";
 
-        // Update the "logged in" label automatically when authentication changed
-        this.AuthenticationService.OnAuthenticationChanged += (sender, args) =>
-        {
-            this.InvokeAsync(this.StateHasChanged);
-        };
+        await this.InvokeAsync(this.StateHasChanged);
 
-        await this.ConnectionInfoService.GetApiInfoAsync();
-        await this.ConnectionInfoService.GetApplicationVersionAsync();
+        // CurrentUser =
     }
 
     /// <summary>

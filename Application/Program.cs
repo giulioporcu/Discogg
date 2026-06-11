@@ -32,13 +32,8 @@ namespace Application
 
             // Services
             builder.Services.AddHttpClient();
-            builder.Services.AddSingleton<DiscogsSettings>();
             builder.Services.AddScoped<ThemeService>();
-            builder.Services.AddScoped<VersionInfoService>();
             builder.Services.AddScoped<LocalStorageService>();
-            builder.Services.AddScoped<JsonSerializationService>();
-            builder.Services.AddScoped<AuthenticationService>();
-            builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<DiscogsClient>();
 
             // MudBlazor

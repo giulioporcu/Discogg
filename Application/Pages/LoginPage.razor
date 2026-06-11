@@ -4,9 +4,7 @@
 @layout LoginLayout
 
 @inject NavigationManager NavigationManager
-@inject DiscogsService DiscogsClient
-@inject AuthenticationService AuthenticationService
-@inject UserService UserService
+@inject DiscogsClient DiscogsClient
 @inject LocalStorageService LocalStorageService
 @inject ISnackbar Snackbar
 
@@ -61,19 +59,19 @@
             this.Token = token;
         }
 
-        this.DiscogsClient.OnRequestStarting += (sender, args) =>
+        this.DiscogsClient.OnHttpRequestStarting += (sender, args) =>
         {
             this.IsBusy = true;
         };
 
-        this.DiscogsClient.OnRequestCompleted += (sender, args) =>
+        this.DiscogsClient.OnHttpRequestCompleted += (sender, args) =>
         {
             this.IsBusy = false;
         };
 
         this.DiscogsClient.OnError += (sender, args) =>
         {
-            this.Snackbar.Add(args, Severity.Error);
+            this.Snackbar.Add(args.ErrorMessage, Severity.Error);
             this.IsBusy = false;
         };
     }
@@ -86,7 +84,7 @@
 
     private async Task LoginAsync()
     {
-        if (await this.AuthenticationService.AuthenticateAsync(this.Token ?? string.Empty) is OAuth oAuth)
+       /* if (await this.AuthenticationService.AuthenticateAsync(this.Token ?? string.Empty) is OAuth oAuth)
         {
             if (this.RememberMe)
             {
@@ -104,6 +102,6 @@
         else
         {
             this.Snackbar.Add(Messages.FailedToAuthenticate, Severity.Error);
-        }
+        }*/
     }
 }
