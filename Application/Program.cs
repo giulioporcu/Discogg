@@ -1,5 +1,6 @@
 using Application.Services;
-using Discogs.API.Services;
+using Discogs.API.Framework;
+using Discogs.API.Framework.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
@@ -31,14 +32,14 @@ namespace Application
 
             // Services
             builder.Services.AddHttpClient();
-            builder.Services.AddSingleton<ApplicationConfig>();
+            builder.Services.AddSingleton<DiscogsSettings>();
             builder.Services.AddScoped<ThemeService>();
             builder.Services.AddScoped<VersionInfoService>();
             builder.Services.AddScoped<LocalStorageService>();
-            builder.Services.AddScoped<SerializationService>();
+            builder.Services.AddScoped<JsonSerializationService>();
             builder.Services.AddScoped<AuthenticationService>();
             builder.Services.AddScoped<UserService>();
-            builder.Services.AddScoped<DiscogsService>();
+            builder.Services.AddScoped<DiscogsClient>();
 
             // MudBlazor
             builder.Services.AddMudServices(config =>

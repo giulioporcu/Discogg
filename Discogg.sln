@@ -5,7 +5,7 @@ VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{CE822854-0197-4FA7-9D40-F2F16DA5CA5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discogs.API.Services", "Discogs.API.Services\Discogs.API.Services.csproj", "{33C59A26-E367-42DA-A7F4-5C6662964783}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discogs.API.Framework", "Discogs.API.Services\Discogs.API.Framework.csproj", "{33C59A26-E367-42DA-A7F4-5C6662964783}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discogs.API.Core", "Discogs.API.Core\Discogs.API.Core.csproj", "{C161163A-A58A-DBF8-40A4-4654AC8EE118}"
 EndProject

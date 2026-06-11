@@ -1,5 +1,0 @@
-﻿{
-  "base_url": "https://api.discogs.com",
-  "max_retries": 3,
-  "initial_delay_ms": 1000
-}

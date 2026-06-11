@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Discogs.API.Core\Discogs.API.Core.csproj" />
-	  <ProjectReference Include="..\Discogs.API.Services\Discogs.API.Services.csproj" />
+	  <ProjectReference Include="..\Discogs.API.Services\Discogs.API.Framework.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
