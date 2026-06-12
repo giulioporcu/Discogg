@@ -1,11 +1,12 @@
 using Discogs.API.Core;
+using Discogs.API.Framework.Extensions;
 
 namespace Discogs.API.Framework.Services
 {
     /// <summary>
     /// Handles OAuth authentication with the Discogs API.
     /// </summary>
-    public class AuthenticationService(DiscogsClient discogsClient, JsonSerializationService jsonSerializationService)
+    public class AuthenticationService(DiscogsClient discogsClient)
     {
         /// <summary>
         /// Gets the Discogs client for API communication.
@@ -13,14 +14,9 @@ namespace Discogs.API.Framework.Services
         private DiscogsClient DiscogsClient { get; } = discogsClient;
 
         /// <summary>
-        /// Gets the JSON serialization service.
-        /// </summary>
-        private JsonSerializationService JsonSerializationService { get; } = jsonSerializationService;
-
-        /// <summary>
         /// Gets the dictionary of cached authenticated users keyed by API token.
         /// </summary>
-        public IDictionary<string, OAuth> AuthenticatedUsers = new Dictionary<string, OAuth>();
+        private Dictionary<string, OAuth> AuthenticatedUsers { get; } = [];
 
         /// <summary>
         /// Retrieves the authenticated user's OAuth identity.
@@ -37,20 +33,24 @@ namespace Discogs.API.Framework.Services
                 throw new ArgumentException("Authentication attempt with empty token.");
             }
 
-            if (this.AuthenticatedUsers.TryGetValue(apiToken, out OAuth? existing) && existing != null)
+            if (this.AuthenticatedUsers.TryGetValue(apiToken, out OAuth? existing))
             {
                 return existing;
             }
 
             try
             {
-                string uri = DiscogsClient.AssembleFullUrl("/oauth/identity", new Dictionary<string, string>() { { "token", apiToken } });
-                using HttpResponseMessage response = await this.DiscogsClient.DoRequestAsync(HttpMethod.Get, uri, content: null, ct);
-                OAuth user = await this.JsonSerializationService.DeserializeContentAsync<OAuth>(response, ct)
-                       ?? throw new InvalidOperationException("Current user cannot be authenticated.");
+                string path = $"/oauth/identity?token={Uri.EscapeDataString(apiToken)}";
+                using HttpResponseMessage response = await this.DiscogsClient.DoGetRequestAsync(path, ct).ConfigureAwait(false);
 
-                this.AuthenticatedUsers.Add(apiToken, user);
-                return user;
+                if (await response.DeserializeContentAsync<OAuth>(ct).ConfigureAwait(false) is OAuth oauth)
+                {
+                    this.AuthenticatedUsers.Add(apiToken, oauth);
+                    return oauth;
+                }
+
+                throw new InvalidOperationException("Current user cannot be authenticated.");
+
             }
             catch (Exception exception)
             {

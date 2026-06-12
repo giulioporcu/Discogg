@@ -3,6 +3,7 @@ using Discogs.API.Framework.Extensions;
 using Discogs.API.Framework.Services;
 using Discogs.API.Framework.Utility;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Discogs.API.Framework
 {
@@ -68,12 +69,7 @@ namespace Discogs.API.Framework
         /// <summary>
         /// Gets the version info service for API version queries.
         /// </summary>
-        public VersionInfoService ApiVersionInfoService { get; }
-
-        /// <summary>
-        /// Gets the JSON serialization service.
-        /// </summary>
-        public JsonSerializationService JsonSerializationService { get; }
+        public VersionInfoService VersionInfoService { get; }
 
         /// <summary>
         /// Gets the authentication service.
@@ -87,14 +83,14 @@ namespace Discogs.API.Framework
         public DiscogsClient(HttpClient client)
         {
             this.HttpClient = client;
-            this.JsonSerializationService = new JsonSerializationService(this);
-            this.ApiVersionInfoService = new VersionInfoService(this, this.JsonSerializationService);
-            this.UserService = new UserService(this, this.JsonSerializationService);
-            this.AuthenticationService = new AuthenticationService(this, this.JsonSerializationService);
+            this.VersionInfoService = new VersionInfoService(this);
+            this.UserService = new UserService(this);
+            this.AuthenticationService = new AuthenticationService(this);
 
-            string product = CurrentAssemblyInfo.GetProduct();
-            string copyright = CurrentAssemblyInfo.GetCopyright();
-            this.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"{product} / {copyright} / {UserAgents.Generate()}");
+            string product = CurrentAssemblyInfo.Product.Value;
+            string copyright = CurrentAssemblyInfo.Copyright.Value;
+            string userAgent = UserAgents.Default.Value;
+            this.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"{product} / {copyright} / {userAgent}");
         }
 
         /// <summary>
@@ -104,27 +100,34 @@ namespace Discogs.API.Framework
         public void RegisterLogger(ILogger logger) => this.Loggers.Add(logger);
 
         /// <summary>
-        /// Assembles a fully qualified Discogs API URI using the specified route
-        /// and optional query parameters.
+        /// Assembles the query parameter path starting with ?.
         /// </summary>
-        /// <param name="route">The API route to append to the base URI.</param>
         /// <param name="queryParams">Optional query parameters to include in the URI.</param>
-        /// <returns>A complete request URI as a string.</returns>
-        public static string AssembleFullUrl(string? route, Dictionary<string, string>? queryParams = null)
+        /// <returns>The query string starting with ?, or empty if no parameters.</returns>
+        public static string AssembleQueryParameters(Dictionary<string, string>? queryParams = null)
         {
-            UriBuilder uriBuilder = new($"{ROOT}{route?.EnsureStartsWith("/") ?? String.Empty}");
-
             if (queryParams is null || queryParams.Count <= 0)
             {
-                return uriBuilder.Uri.ToString();
+                return String.Empty;
             }
 
-            string query = String.Join("&", queryParams
-                .Where(pair => !String.IsNullOrWhiteSpace(pair.Value))
-                .Select(pair => $"{pair.Key}={Uri.EscapeDataString(pair.Value!)}"));
+            StringBuilder stringBuilder = new();
 
-            uriBuilder.Query = query;
-            return uriBuilder.Uri.ToString();
+            bool firstParameter = true;
+            foreach (KeyValuePair<string, string> pair in queryParams)
+            {
+                if (String.IsNullOrWhiteSpace(pair.Value))
+                {
+                    continue;
+                }
+
+                stringBuilder.Append(firstParameter ? '?' : '&');
+                firstParameter = false;
+
+                stringBuilder.Append(pair.Key).Append('=').Append(Uri.EscapeDataString(pair.Value));
+            }
+
+            return stringBuilder.ToString();
         }
 
         /// <summary>
@@ -136,6 +139,8 @@ namespace Discogs.API.Framework
         /// <param name="ct">Cancellation token for the request.</param>
         /// <returns>The HTTP response message.</returns>
         /// <exception cref="HttpRequestException">The API request ran into an error.</exception>
+        /// <exception cref="UriFormatException">If the uri string is malformed.</exception>
+        /// <exception cref="OperationCanceledException">If the request was canceled.</exception>
         public async Task<HttpResponseMessage> DoRequestAsync(HttpMethod method, string uriString, HttpContent? content, CancellationToken ct)
         {
             try
@@ -145,9 +150,10 @@ namespace Discogs.API.Framework
                 this.OnHttpRequestStarting?.Invoke(this, new HttpRequestStartingEventArgs(method, uri));
                 HttpResponseMessage responseMessage = await this.HttpClient.SendAsync(request, ct).ConfigureAwait(false);
                 this.OnHttpRequestCompleted?.Invoke(this, new HttpRequestCompletedEventArgs(method, uri, responseMessage.StatusCode));
+
                 return responseMessage;
             }
-            catch (HttpRequestException exception)
+            catch (Exception exception)
             {
                 this.TriggerErrorEvent(this, exception.Message);
                 throw;
@@ -161,6 +167,6 @@ namespace Discogs.API.Framework
         /// <param name="ct">Cancellation token for the request.</param>
         /// <returns>The HTTP response message.</returns>
         public async Task<HttpResponseMessage> DoGetRequestAsync(string? path = null, CancellationToken ct = default)
-            => await this.DoRequestAsync(HttpMethod.Get, $"{ROOT}{path?.EnsureStartsWith("/")}", null, ct);
+            => await this.DoRequestAsync(HttpMethod.Get, $"{ROOT}{path?.EnsureStartsWith("/")}", null, ct).ConfigureAwait(false);
     }
 }

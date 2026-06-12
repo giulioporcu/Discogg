@@ -15,9 +15,8 @@ namespace Discogs.API.Framework.Utility
         /// <summary>
         /// Gets the assembly's informational version.
         /// </summary>
-        /// <returns>The major.minor version string.</returns>
         /// <exception cref="InvalidOperationException">The version attribute is missing, empty, or unparsable.</exception>
-        public static string GetVersion()
+        public static readonly Lazy<string> Version = new(() =>
         {
             if (ExecutingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>() is AssemblyInformationalVersionAttribute attribute)
             {
@@ -30,38 +29,36 @@ namespace Discogs.API.Framework.Utility
 
                 string numericPart = raw.Split('-', '+')[0];
 
-                return Version.TryParse(numericPart, out Version? version)
-                    ? $"{version.Major}.{version.Minor}"
-                    : throw new InvalidOperationException("Informational version is not parsable.");
+                return System.Version.TryParse(numericPart, out Version? version)
+                        ? $"{version.Major}.{version.Minor}"
+                        : throw new InvalidOperationException("Informational version is not parsable.");
             }
             else
             {
                 throw new InvalidOperationException("The version info is not set.");
             }
-        }
+        });
 
         /// <summary>
         /// Gets the assembly product name.
         /// </summary>
-        /// <returns>The product name.</returns>
         /// <exception cref="InvalidOperationException">The product attribute is not set.</exception>
-        public static string GetProduct()
+        public static readonly Lazy<string> Product = new(() =>
         {
             return ExecutingAssembly.GetCustomAttribute<AssemblyProductAttribute>() is AssemblyProductAttribute attribute
                 ? attribute.Product
                 : throw new InvalidOperationException("The product info is not set.");
-        }
+        });
 
         /// <summary>
         /// Gets the assembly copyright information.
         /// </summary>
-        /// <returns>The copyright string.</returns>
         /// <exception cref="InvalidOperationException">The copyright attribute is not set.</exception>
-        public static string GetCopyright()
+        public static readonly Lazy<string> Copyright = new(() =>
         {
             return ExecutingAssembly.GetCustomAttribute<AssemblyCopyrightAttribute>() is AssemblyCopyrightAttribute attribute
                 ? attribute.Copyright
                 : throw new InvalidOperationException("The copyright info is not set.");
-        }
+        });
     }
 }

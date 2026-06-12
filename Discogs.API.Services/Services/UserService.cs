@@ -1,11 +1,13 @@
 ﻿using Discogs.API.Core;
+using Discogs.API.Framework.Extensions;
+using System.Text.Json;
 
 namespace Discogs.API.Framework.Services
 {
     /// <summary>
     /// Provides methods for retrieving Discogs user profiles.
     /// </summary>
-    public class UserService(DiscogsClient discogsClient, JsonSerializationService jsonSerializationService)
+    public class UserService(DiscogsClient discogsClient)
     {
         /// <summary>
         /// Gets the Discogs client for API communication.
@@ -15,12 +17,11 @@ namespace Discogs.API.Framework.Services
         /// <summary>
         /// Gets the JSON serialization service.
         /// </summary>
-        private JsonSerializationService JsonSerializationService { get; } = jsonSerializationService;
 
         /// <summary>
         /// Gets the dictionary of cached user profiles keyed by username.
         /// </summary>
-        public IDictionary<string, UserProfile> UserProfiles = new Dictionary<string, UserProfile>();
+        private Dictionary<string, UserProfile> UserProfiles { get; } = [];
 
         /// <summary>
         /// Retrieves a user's public profile from Discogs.
@@ -31,15 +32,17 @@ namespace Discogs.API.Framework.Services
         /// <exception cref="ArgumentException">The API response could not be parsed into a profile.</exception>
         public async Task<UserProfile?> GetProfileAsync(string userName, CancellationToken ct = default)
         {
-            if (this.UserProfiles.TryGetValue(userName, out UserProfile? existing) && existing != null)
+            if (this.UserProfiles.TryGetValue(userName, out UserProfile? existing))
             {
                 return existing;
             }
 
             try
             {
-                using HttpResponseMessage responseMessage = await this.DiscogsClient.DoGetRequestAsync($"/users/{userName}", ct);
-                if (await this.JsonSerializationService.DeserializeContentAsync<UserProfile>(responseMessage, ct) is UserProfile userProfile)
+                string path = $"/users/{userName}";
+                using HttpResponseMessage response = await this.DiscogsClient.DoGetRequestAsync(path, ct).ConfigureAwait(false);
+
+                if (await response.DeserializeContentAsync<UserProfile>(ct).ConfigureAwait(false) is UserProfile userProfile)
                 {
                     this.UserProfiles.Add(userName, userProfile);
                     return userProfile;

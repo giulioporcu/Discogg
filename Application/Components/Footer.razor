@@ -44,15 +44,33 @@
 </MudPaper>
 
 @code {
+    /// <summary>
+    /// Delay in milliseconds before tooltips appear.
+    /// </summary>
     private const int TOOLTIP_DELAY = 100;
+
+    /// <summary>
+    /// Gets or sets the current application version.
+    /// </summary>
     private string? AppVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Discogs API version string.
+    /// </summary>
     private string? DiscogsVersion { get; set; }
+
+    /// <summary>
+    /// Gets or sets the currently authenticated user.
+    /// </summary>
     private OAuth? CurrentUser { get; set; }
 
+    /// <summary>
+    /// Loads version information on component initialization.
+    /// </summary>
     protected override async void OnInitialized()
     {
-        this.AppVersion = this.DiscogsClient.ApiVersionInfoService.GetApplicationVersion();
-        this.DiscogsVersion = (await this.DiscogsClient.ApiVersionInfoService.GetDiscogsVersionAsync()).ApiVersion ?? "N/A";
+        this.AppVersion = this.DiscogsClient.VersionInfoService.GetApplicationVersion();
+        this.DiscogsVersion = (await this.DiscogsClient.VersionInfoService.GetDiscogsVersionAsync()).ApiVersion ?? "N/A";
 
         await this.InvokeAsync(this.StateHasChanged);
 

@@ -41,15 +41,44 @@
 </MudContainer>
 
 @code {
+    /// <summary>
+    /// Local storage key for the remember‑token flag.
+    /// </summary>
     private const string REMEMBER_TOKEN_KEY = "remember-token";
+
+    /// <summary>
+    /// Local storage key for the stored API token.
+    /// </summary>
     private const string TOKEN_KEY = "token";
+
+    /// <summary>
+    /// Truthy value indicating the token should be remembered.
+    /// </summary>
     private const string REMEMBER_TOKEN_TRUTHY = "T";
 
+    /// <summary>
+    /// Gets or sets the API token entered by the user.
+    /// </summary>
     private string? Token { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the token should be persisted.
+    /// </summary>
     private bool RememberMe { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the password is visible.
+    /// </summary>
     private bool ShowPassword { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether a request is in progress.
+    /// </summary>
     private bool IsBusy { get; set; }
 
+    /// <summary>
+    /// Loads persisted token preference on initialization.
+    /// </summary>
     protected async override Task OnInitializedAsync()
     {
         this.RememberMe = await this.LocalStorageService.GetAsync(REMEMBER_TOKEN_KEY) == REMEMBER_TOKEN_TRUTHY;
@@ -76,12 +105,17 @@
         };
     }
 
+    /// <summary>
+    /// Toggles password visibility.
+    /// </summary>
     private void TogglePasswordVisibility()
     {
         this.ShowPassword = !this.ShowPassword;
     }
 
-
+    /// <summary>
+    /// Authenticates the user with the provided API token.
+    /// </summary>
     private async Task LoginAsync()
     {
        /* if (await this.AuthenticationService.AuthenticateAsync(this.Token ?? string.Empty) is OAuth oAuth)

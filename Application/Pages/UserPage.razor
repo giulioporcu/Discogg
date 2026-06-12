@@ -1,8 +1,7 @@
 @page "/user/{userName}"
 
-@using System.Globalization
 @inject NavigationManager Nav
-@inject UserService UserService
+@inject DiscogsClient DiscogsClient
 
 <PageTitle>@userName</PageTitle>
 
@@ -164,20 +163,48 @@
 </style>
 
 @code {
+    /// <summary>
+    /// Gets or sets the username from the route parameter.
+    /// </summary>
     [Parameter] public string? userName { get; set; }
 
+    /// <summary>
+    /// The loaded user profile.
+    /// </summary>
     private UserProfile? user;
+
+    /// <summary>
+    /// Whether the user data is still loading.
+    /// </summary>
     private bool isLoading = true;
+
+    /// <summary>
+    /// Sum of the lowest prices across collection items.
+    /// </summary>
     private decimal sumLowestPrice;
+
+    /// <summary>
+    /// Total number of collection items.
+    /// </summary>
     private int totalItems;
 
+    /// <summary>
+    /// Collection items visible in the current carousel view.
+    /// </summary>
     private List<UserCollectionFolder> visibleItems = new();
+
+    /// <summary>
+    /// Current index of the carousel view.
+    /// </summary>
     private int carouselIndex = 0;
 
+    /// <summary>
+    /// Loads the user profile when the route parameter changes.
+    /// </summary>
     protected override async Task OnParametersSetAsync()
     {
         isLoading = true;
-        user = await UserService.GetAsync(userName);
+        user = await DiscogsClient.UserService.GetProfileAsync(userName!);
         
        // if (user?.CollectionFolders != null)
         {
@@ -192,6 +219,9 @@
         isLoading = false;
     }
 
+    /// <summary>
+    /// Moves the carousel to the previous page of items.
+    /// </summary>
     private void PrevItem()
     {
    //     if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
@@ -202,6 +232,9 @@
         UpdateVisibleItems();
     }
 
+    /// <summary>
+    /// Moves the carousel to the next page of items.
+    /// </summary>
     private void NextItem()
     {
     //    if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)
@@ -211,6 +244,9 @@
         UpdateVisibleItems();
     }
 
+    /// <summary>
+    /// Updates the set of items visible in the carousel.
+    /// </summary>
     private void UpdateVisibleItems()
     {
     //    if (user?.CollectionFolders is null || user.CollectionFolders.Count == 0)

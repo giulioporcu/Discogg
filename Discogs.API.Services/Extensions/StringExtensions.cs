@@ -12,6 +12,6 @@
         /// <param name="prefix">The prefix to prepend if not already present.</param>
         /// <returns>The string with the prefix prepended.</returns>
         public static string EnsureStartsWith(this string value, string prefix)
-            => value == null ? prefix : prefix + value.TrimStart(prefix.ToCharArray());
+            => value is null || value.StartsWith(prefix, StringComparison.Ordinal) ? value ?? prefix : prefix + value;
     }
 }

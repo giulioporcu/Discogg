@@ -1,4 +1,5 @@
 ﻿using Discogs.API.Core;
+using Discogs.API.Framework.Extensions;
 using Discogs.API.Framework.Utility;
 
 namespace Discogs.API.Framework.Services
@@ -6,7 +7,7 @@ namespace Discogs.API.Framework.Services
     /// <summary>
     /// Provides application and API version information.
     /// </summary>
-    public class VersionInfoService(DiscogsClient client, JsonSerializationService serializationService)
+    public class VersionInfoService(DiscogsClient client)
     {
         /// <summary>
         /// Gets the Discogs client for API communication.
@@ -14,19 +15,15 @@ namespace Discogs.API.Framework.Services
         private DiscogsClient Client { get; } = client;
 
         /// <summary>
-        /// Gets the JSON serialization service.
-        /// </summary>
-        private JsonSerializationService JsonSerializationService { get; } = serializationService;
-
-        /// <summary>
         /// Gets the current application version from assembly metadata.
         /// </summary>
         /// <returns>The application version string.</returns>
+        /// <exception cref="InvalidOperationException">The assembly version attribute is missing, empty, or unparsable.</exception>
         public string GetApplicationVersion()
         {
             try
             {
-                return CurrentAssemblyInfo.GetVersion();
+                return CurrentAssemblyInfo.Version.Value;
             }
             catch (Exception exception)
             {
@@ -40,17 +37,16 @@ namespace Discogs.API.Framework.Services
         /// </summary>
         /// <param name="ct">Cancellation token for the request.</param>
         /// <returns>The API version information.</returns>
-        /// <exception cref="InvalidOperationException">The API response could not be deserialized.</exception>
+        /// <exception cref="InvalidDataException">The API response could not be deserialized.</exception>
         public async Task<ApiVersionInfo> GetDiscogsVersionAsync(CancellationToken ct = default)
         {
             try
             {
-                using HttpResponseMessage responseMessage = await this.Client.DoGetRequestAsync(path: null, ct);
+                using HttpResponseMessage response = await this.Client.DoGetRequestAsync(path: null, ct).ConfigureAwait(false);
 
-                return await this.JsonSerializationService.DeserializeContentAsync<ApiVersionInfo>(responseMessage, ct)
-                    ?? throw new InvalidOperationException("Unable to parse Discogs response.");
+                return await response.DeserializeContentAsync<ApiVersionInfo>(ct).ConfigureAwait(false) ?? throw new InvalidDataException("Unable to parse Discogs response.");
             }
-            catch (InvalidOperationException exception)
+            catch (InvalidDataException exception)
             {
                 this.Client.TriggerErrorEvent(this, exception.Message);
                 throw;

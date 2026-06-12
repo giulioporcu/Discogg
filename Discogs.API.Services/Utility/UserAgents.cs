@@ -11,7 +11,7 @@ namespace Discogs.API.Framework.Utility
         /// Generates a user-agent string based on a locally installed browser.
         /// </summary>
         /// <returns>A user-agent string.</returns>
-        public static string Generate()
+        public static readonly Lazy<string> Default = new(() =>
         {
             string? windowsVersion = GetWindowsVersion();
 
@@ -37,7 +37,7 @@ namespace Discogs.API.Framework.Utility
 
             // Fallback
             return $"Mozilla/5.0 ({windowsVersion}; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
-        }
+        });
 
         /// <summary>
         /// Gets the Windows NT version string.
