@@ -13,7 +13,7 @@ namespace Discogs.API.Core
         [JsonPropertyName("id")]
         public int? Id { get; set; }
 
-        /// <summary> 
+        /// <summary>
         /// Gets or sets the API resource URL for this listing.
         /// </summary>
         [JsonPropertyName("resource_url")]

@@ -13,7 +13,7 @@ namespace Discogs.API.Core
         [JsonPropertyName("id")]
         public int? Id { get; set; }
 
-        /// <summary> 
+        /// <summary>
         /// Gets or sets the resource type (e.g., release, master, artist, label).
         /// </summary>
         [JsonPropertyName("type")]

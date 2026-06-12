@@ -15,7 +15,7 @@ namespace Discogs.API.Core
 
         /// <summary>
         /// Gets or sets the community metadata for the contribution.
-        /// </summary> 
+        /// </summary>
         [JsonPropertyName("community")]
         public Community? Community { get; set; }
     }
