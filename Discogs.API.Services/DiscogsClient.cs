@@ -89,8 +89,7 @@ namespace Discogs.API.Framework
 
             string product = CurrentAssemblyInfo.Product.Value;
             string copyright = CurrentAssemblyInfo.Copyright.Value;
-            string userAgent = UserAgents.Default.Value;
-            this.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"{product} / {copyright} / {userAgent}");
+            this.HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"{product}/{copyright}");
         }
 
         /// <summary>
