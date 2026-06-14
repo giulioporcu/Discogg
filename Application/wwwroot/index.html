@@ -2,10 +2,12 @@
 <html lang="en" class="no-transitions">
 
 <head>
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json" />
     <script>
-        // Apply theme BEFORE CSS loads (prevents white flashing)
-        const theme = localStorage.getItem("data-theme") || "dark";
-        document.documentElement.setAttribute("data-theme", theme);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
     </script>
 
     <meta charset="utf-8" />
@@ -16,6 +18,13 @@
     <base href="/" />
 
     <!-- CSS -->
+    
+    <script>
+        // Apply theme BEFORE CSS loads (prevents white flashing)
+        const theme = localStorage.getItem("data-theme") || "dark";
+        document.documentElement.setAttribute("data-theme", theme);
+    </script>
+
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="Application.styles.css" rel="stylesheet" />
